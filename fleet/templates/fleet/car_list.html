@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Apex Fleet | Performance Car Rentals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0c10;
+            --card-bg: #12151c;
+            --accent: #ff3b30;
+            --accent-glow: rgba(255, 59, 48, 0.35);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #232733;
+            --success: #34c759;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        header {
+            padding: 30px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(10, 12, 16, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        /* AI Recommendation Banner */
+        .ai-banner-container {
+            max-width: 1200px;
+            margin: 40px auto 30px;
+            padding: 0 20px;
+        }
+
+        .ai-card {
+            background: linear-gradient(135deg, #161b26 0%, #1a1528 100%);
+            border: 1px solid #3b3260;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-card::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.3), transparent 70%);
+            pointer-events: none;
+        }
+
+        .ai-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .ai-badge {
+            background: #9333ea;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ai-input-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .ai-input {
+            flex: 1;
+            min-width: 280px;
+            background: #0d0f15;
+            border: 1px solid #2d3345;
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .ai-input:focus {
+            border-color: #9333ea;
+        }
+
+        .ai-btn {
+            background: #9333ea;
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-btn:hover {
+            background: #a855f7;
+            transform: translateY(-1px);
+        }
+
+        /* Fleet Grid */
+        .fleet-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        /* Car Card */
+        .car-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .car-card:hover {
+            transform: translateY(-5px);
+            border-color: #3b4255;
+            box-shadow: 0 16px 30px rgba(0,0,0,0.5);
+        }
+
+        .car-card.recommended {
+            border: 2px solid #a855f7;
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+        }
+
+        .rec-tag {
+            display: none;
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: #9333ea;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .car-card.recommended .rec-tag {
+            display: block;
+        }
+
+        .image-wrapper {
+            position: relative;
+            height: 210px;
+            width: 100%;
+            overflow: hidden;
+            background: #191d26;
+        }
+
+        .car-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .car-card:hover .car-img {
+            transform: scale(1.05);
+        }
+
+        /* Interactive Rev Engine Button */
+        .rev-engine-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(18, 21, 28, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .rev-engine-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .rev-engine-btn.playing {
+            background: var(--accent);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.06); }
+        }
+
+        .car-body {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .car-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+
+        .car-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .car-rate {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .car-rate span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .car-tagline {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #0a0c10;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+        }
+
+        .spec-item {
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .spec-val {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .ai-recommendation-note {
+            display: none;
+            background: rgba(147, 51, 234, 0.15);
+            border: 1px solid rgba(147, 51, 234, 0.35);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.82rem;
+            color: #d8b4fe;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .book-btn {
+            margin-top: auto;
+            width: 100%;
+            background: #1e2430;
+            color: #fff;
+            border: 1px solid #2d3345;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .book-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">APEX<span>FLEET</span></div>
+        <div style="font-size: 0.9rem; color: var(--text-muted);">Self-Drive High Performance Fleet</div>
+    </header>
+
+    <!-- AI Trip Assistant -->
+    <div class="ai-banner-container">
+        <div class="ai-card">
+            <div class="ai-title">
+                <span>Trip Planner AI</span>
+                <span class="ai-badge">Intelligent Match</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Describe your journey (passengers, terrain, luggage, or vibe) and our engine will score and match the optimal cars.
+            </p>
+            <div class="ai-input-group">
+                <input type="text" id="tripInput" class="ai-input" placeholder="e.g. Weekend road trip to Coorg hills with 4 friends and heavy luggage...">
+                <button class="ai-btn" id="matchBtn" onclick="runAiTripMatcher()">
+                    <span>Match Vehicles</span> ⚡
+                </button>
+            </div>
+            <div id="aiStatus" style="font-size: 0.85rem; color: #a855f7; margin-top: 10px; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Vehicles List -->
+    <div class="fleet-container">
+        <div class="section-header">
+            <h2>Available Fleet ({{ cars|length }})</h2>
+        </div>
+
+        <div class="cars-grid">
+            {% for car in cars %}
+            <div class="car-card" id="car-card-{{ car.id }}">
+                <div class="rec-tag">AI Top Pick</div>
+                
+                <div class="image-wrapper">
+                    <img src="{{ car.image_url }}" alt="{{ car.brand }} {{ car.model_name }}" class="car-img" referrerpolicy="no-referrer">
+                    {% if car.engine_rev_url %}
+            
+                    {% endif %}
+                </div>
+
+                <div class="car-body">
+                    <div class="car-title-row">
+                        <div class="car-name">{{ car.brand }} {{ car.model_name }}</div>
+                        <div class="car-rate">₹{{ car.daily_rate|floatformat:0 }}<span>/day</span></div>
+                    </div>
+                    <div class="car-tagline">{{ car.tagline }}</div>
+
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <div class="spec-label">Capacity</div>
+                            <div class="spec-val">{{ car.seating_capacity }} Seats</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Fuel</div>
+                            <div class="spec-val">{{ car.get_fuel_type_display }}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Power</div>
+                            <div class="spec-val">{{ car.horsepower }} HP</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-recommendation-note" id="rec-note-{{ car.id }}"></div>
+
+                   <a href="{% url 'reserve_car' car.id %}" class="reserve-btn" style="text-decoration: none; text-align: center; display: block;">Reserve Vehicle</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Audio Player Controller Script -->
+    <script>
+        let currentAudio = null;
+        let currentButton = null;
+
+        function playEngineSound(button, audioUrl) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                if (currentButton) {
+                    currentButton.classList.remove('playing');
+                    currentButton.querySelector('span').innerText = '🔊 Rev Engine';
+                }
+            }
+
+            if (currentButton === button) {
+                currentButton = null;
+                currentAudio = null;
+                return;
+            }
+
+            currentAudio = new Audio(audioUrl);
+            currentButton = button;
+            button.classList.add('playing');
+            button.querySelector('span').innerText = '🔥 Revving...';
+
+            currentAudio.play().catch(e => {
+                console.error("Audio playback error:", e);
+                button.classList.remove('playing');
+                button.querySelector('span').innerText = '🔊 Rev Engine';
+            });
+
+            currentAudio.onended = () => {
+                button.classList.remove('playing');
+                button.querySelector('span').innerText = '🔊 Rev Engine';
+                currentButton = null;
+                currentAudio = null;
+            };
+        }
+
+        function runAiTripMatcher() {
+            const prompt = document.getElementById('tripInput').value.trim();
+            const statusBox = document.getElementById('aiStatus');
+            const btn = document.getElementById('matchBtn');
+
+            if (!prompt) {
+                alert("Please describe your trip plan first!");
+                return;
+            }
+
+            // Reset previous highlights
+            document.querySelectorAll('.car-card').forEach(card => card.classList.remove('recommended'));
+            document.querySelectorAll('.ai-recommendation-note').forEach(note => {
+                note.style.display = 'none';
+                note.innerText = '';
+            });
+
+            btn.disabled = true;
+            btn.innerText = "Analyzing Fleet...";
+            statusBox.style.display = "block";
+            statusBox.innerText = "Processing requirements and terrain suitability...";
+
+            fetch('/api/recommend/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ trip_description: prompt })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Match Vehicles</span> ⚡';
+
+                if (data.recommendations && data.recommendations.length > 0) {
+                    statusBox.innerText = `Top ${data.recommendations.length} recommendations matched!`;
+
+                    data.recommendations.forEach(rec => {
+                        const card = document.getElementById(`car-card-${rec.car_id}`);
+                        const note = document.getElementById(`rec-note-${rec.car_id}`);
+                        
+                        if (card) {
+                            card.classList.add('recommended');
+                        }
+                        if (note) {
+                            note.style.display = 'block';
+                            note.innerText = `💡 ${rec.match_reason}`;
+                        }
+                    });
+
+                    // Scroll down smoothly to the first match
+                    const firstCard = document.getElementById(`car-card-${data.recommendations[0].car_id}`);
+                    if (firstCard) {
+                        firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                    statusBox.innerText = "No specific matches found. Displaying general fleet.";
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Match Vehicles</span> ⚡';
+                statusBox.innerText = "Failed to fetch AI recommendation. Ensure your server is active.";
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>
